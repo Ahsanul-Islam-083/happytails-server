@@ -70,17 +70,25 @@ async function run() {
       res.send(result);
     });
 
-
-
     app.get('/allPets/:petId', async (req, res) => {
       const id = req.params.petId;
       const query = { _id: new ObjectId(id) };
       const result = await petsCollection.findOne(query);
       res.send(result);
     })
+
+    app.delete('/allPets/:petId', async (req, res) => {
+      const id = req.params.petId;
+      const query = { _id: new ObjectId(id) };
+      const result = await petsCollection.deleteOne(query);
+      res.send(result);
+    }) 
+
+
     app.patch('/allPets/:petId', async (req, res) => {
       const id = req.params.petId;
       const updatedPet = req.body;
+      
       const result = await petsCollection.updateOne(
         {_id: new ObjectId(id)},
         {$set: updatedPet}
@@ -93,6 +101,14 @@ async function run() {
       const result = await petsCollection.insertOne(pet);
       res.send(result);
      })
+
+
+    app.get('/myPostsList/:userId',async(req,res)=>{
+     const {userId} = req.params;
+     const result = await petsCollection.find({userId:userId}).toArray()
+     res.send(result)
+    })
+    
 
 
 
