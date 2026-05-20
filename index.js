@@ -57,6 +57,7 @@ async function run() {
     // await client.db("admin").command({ ping: 1 });
     const db = client.db("happytailsdb");
     const petsCollection = db.collection("pets");
+    const adoptionApplicationsCollection = db.collection("adoptionApplications");
 
 
 
@@ -108,7 +109,14 @@ async function run() {
      const result = await petsCollection.find({userId:userId}).toArray()
      res.send(result)
     })
-    
+
+    // to Create an Adoption Request 
+    app.post('/adopt',async(req,res)=>{
+      const applicationData = req.body;
+      applicationData.status = 'pending';
+      const result = await adoptionApplicationsCollection.insertOne(applicationData);
+      res.send(result);
+    })
 
 
 
