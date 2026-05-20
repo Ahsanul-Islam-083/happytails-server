@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { jwtVerify, createRemoteJWKSet } = require('jose-cjs');
 dotenv.config();
 
 const uri = process.env.MONGODB_URI;
@@ -24,6 +25,30 @@ const client = new MongoClient(uri, {
   }
 });
 
+
+const JWKS = createRemoteJWKSet(
+  new URL(`${process.env.CLIENT_URL}/api/auth/jwks`)
+)
+
+const verifyToken = async (req, res, next) => {
+  const { authorization } = req.headers;
+  const token = authorization.split('')[1];
+  if (!token) {
+    return res.status(401).send({ message: 'Unauthorized Access' });
+  }
+  try {
+    const { payload } = await jwtVerify(token, JWKS);
+    req.user = payload;
+    next();
+  } catch (error) {
+    console.error('Token validation failed:', error)
+    return res.status(403).json({ message: "Forbidden" })
+  }
+}
+
+
+
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -31,22 +56,43 @@ async function run() {
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     const db = client.db("happytailsdb");
-    const petsCollection = db.collection("pets"); 
-    
+    const petsCollection = db.collection("pets");
 
 
-    app.get('/allPets', async (req, res)=> {
+
+    app.get('/allPets', async (req, res) => {
       const result = await petsCollection.find().toArray();
       res.send(result);
     });
 
-    app.get('/allPets/:petId', async (req, res)=> {
+    app.get('/featuredPets', async (req, res) => {
+      const result = await petsCollection.find().limit(6).toArray();
+      res.send(result);
+    });
+
+
+
+    app.get('/allPets/:petId', async (req, res) => {
       const id = req.params.petId;
-      const query = {_id: new ObjectId(id)};
+      const query = { _id: new ObjectId(id) };
       const result = await petsCollection.findOne(query);
       res.send(result);
     })
+    app.patch('/allPets/:petId', async (req, res) => {
+      const id = req.params.petId;
+      const updatedPet = req.body;
+      const result = await petsCollection.updateOne(
+        {_id: new ObjectId(id)},
+        {$set: updatedPet}
+      )
+      res.send(result);
+    })
 
+    app.post('/addPet', async (req, res) => {
+      const pet = req.body;
+      const result = await petsCollection.insertOne(pet);
+      res.send(result);
+     })
 
 
 
@@ -62,11 +108,11 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('Hello World!');
-}); 
+  res.send('Hello World!');
+});
 
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+  console.log(`Server is running on port ${port}`);
 });
 
 // nK0265ES3dBluoAj happytails
