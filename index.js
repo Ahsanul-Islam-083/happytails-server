@@ -32,7 +32,7 @@ const JWKS = createRemoteJWKSet(
 
 const verifyToken = async (req, res, next) => {
   const { authorization } = req.headers;
-  const token = authorization.split('')[1];
+  const token = authorization.split(' ')[1];
   if (!token) {
     return res.status(401).send({ message: 'Unauthorized Access' });
   }
@@ -115,6 +115,13 @@ async function run() {
       const applicationData = req.body;
       applicationData.status = 'pending';
       const result = await adoptionApplicationsCollection.insertOne(applicationData);
+      res.send(result);
+    })
+
+    // to get User's Adoption Requests
+    app.get('my-requests/:email', async( req,res)=>{
+      const email = req.params.email;
+      const result = await adoptionApplicationsCollection.find({userEmail:email}).toArray();
       res.send(result);
     })
 
