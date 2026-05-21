@@ -60,11 +60,25 @@ async function run() {
     const adoptionApplicationsCollection = db.collection("adoptionApplications");
 
 
-
+    
     app.get('/allPets', async (req, res) => {
-      const result = await petsCollection.find().toArray();
+      const {search, category} = req.query;
+
+      let cursor={};
+
+      if (search) {
+        cursor.petName = {$regex: search, $options: 'i'};
+      }
+
+      if (category) {
+        cursor.species = {$in:[category]};
+      }
+
+      const result = await petsCollection.find(cursor).toArray();
       res.send(result);
     });
+
+
 
     app.get('/featuredPets', async (req, res) => {
       const result = await petsCollection.find().limit(6).toArray();
@@ -142,21 +156,21 @@ async function run() {
       const { status, petId } = req.body;
 
       const updateRequestStatus = await adoptionApplicationsCollection.updateOne(
-        {_id: new ObjectId(id)},
-        {$set: {status: status}}
+        { _id: new ObjectId(id) },
+        { $set: { status: status } }
       )
 
       // to update pet status
       if (status === 'approved') {
         await petsCollection.updateOne(
-          {_id: new ObjectId(petId)},
-          {$set: {status: 'adopted'}}
+          { _id: new ObjectId(petId) },
+          { $set: { status: 'adopted' } }
         )
       };
 
       await adoptionApplicationsCollection.updateMany(
-        {petId: petId, _id: {$ne: new ObjectId(id)}},
-        {$set: {status: 'rejected'}}
+        { petId: petId, _id: { $ne: new ObjectId(id) } },
+        { $set: { status: 'rejected' } }
       );
       res.send(updateRequestStatus);
     })
