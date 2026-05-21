@@ -119,12 +119,17 @@ async function run() {
     })
 
     // to get User's Adoption Requests
-    app.get('my-requests/:email', async( req,res)=>{
+    app.get('/my-requests/:email', async( req,res)=>{
       const email = req.params.email;
       const result = await adoptionApplicationsCollection.find({userEmail:email}).toArray();
       res.send(result);
     })
-
+   
+    app.delete('/my-requests/:id',async(req,res)=>{
+      const id = req.params.id;
+      const result = await adoptionApplicationsCollection.deleteOne({_id: new ObjectId(id)});
+      res.send(result);
+    }) 
 
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
