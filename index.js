@@ -83,16 +83,16 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await petsCollection.deleteOne(query);
       res.send(result);
-    }) 
+    })
 
 
     app.patch('/allPets/:petId', async (req, res) => {
       const id = req.params.petId;
       const updatedPet = req.body;
-      
+
       const result = await petsCollection.updateOne(
-        {_id: new ObjectId(id)},
-        {$set: updatedPet}
+        { _id: new ObjectId(id) },
+        { $set: updatedPet }
       )
       res.send(result);
     })
@@ -101,17 +101,17 @@ async function run() {
       const pet = req.body;
       const result = await petsCollection.insertOne(pet);
       res.send(result);
-     })
+    })
 
 
-    app.get('/myPostsList/:userId',async(req,res)=>{
-     const {userId} = req.params;
-     const result = await petsCollection.find({userId:userId}).toArray()
-     res.send(result)
+    app.get('/myPostsList/:userId', async (req, res) => {
+      const { userId } = req.params;
+      const result = await petsCollection.find({ userId: userId }).toArray()
+      res.send(result)
     })
 
     // to Create an Adoption Request 
-    app.post('/adopt',async(req,res)=>{
+    app.post('/adopt', async (req, res) => {
       const applicationData = req.body;
       applicationData.status = 'pending';
       const result = await adoptionApplicationsCollection.insertOne(applicationData);
@@ -119,22 +119,46 @@ async function run() {
     })
 
     // to get User's Adoption Requests
-    app.get('/my-requests/:email', async( req,res)=>{
+    app.get('/my-requests/:email', async (req, res) => {
       const email = req.params.email;
-      const result = await adoptionApplicationsCollection.find({userEmail:email}).toArray();
+      const result = await adoptionApplicationsCollection.find({ userEmail: email }).toArray();
       res.send(result);
     })
-   
-    app.delete('/my-requests/:id',async(req,res)=>{
-      const id = req.params.id;
-      const result = await adoptionApplicationsCollection.deleteOne({_id: new ObjectId(id)});
-      res.send(result);
-    }) 
 
-    app.get('/pet-requests/:petId',async(req,res)=>{
-      const {petId} = req.params;
-      const result = await adoptionApplicationsCollection.find({petId:petId}).toArray();
+    app.delete('/my-requests/:id', async (req, res) => {
+      const id = req.params.id;
+      const result = await adoptionApplicationsCollection.deleteOne({ _id: new ObjectId(id) });
       res.send(result);
+    })
+
+    app.get('/pet-requests/:petId', async (req, res) => {
+      const { petId } = req.params;
+      const result = await adoptionApplicationsCollection.find({ petId: petId }).toArray();
+      res.send(result);
+    })
+
+    app.patch('adopt-status/:id', async (req, res) => {
+      const { id } = req.params;
+      const { status, petId } = req.body;
+
+      const updateRequestStatus = await adoptionApplicationsCollection.updateOne(
+        {_id: new ObjectId(id)},
+        {$set: {status: status}}
+      )
+
+      // to update pet status
+      if (status === 'approved') {
+        await petsCollection.updateOne(
+          {_id: new ObjectId(petId)},
+          {$set: {status: 'adopted'}}
+        )
+      };
+
+      await adoptionApplicationsCollection.updateMany(
+        {petId: petId, _id: {$ne: new ObjectId(id)}},
+        {$set: {status: 'rejected'}}
+      );
+      res.send(updateRequestStatus);
     })
 
 
