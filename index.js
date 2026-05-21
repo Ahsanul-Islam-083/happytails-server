@@ -92,7 +92,7 @@ async function run() {
       res.send(result);
     })
 
-    app.delete('/allPets/:petId', async (req, res) => {
+    app.delete('/allPets/:petId', verifyToken, async (req, res) => {
       const id = req.params.petId;
       const query = { _id: new ObjectId(id) };
       const result = await petsCollection.deleteOne(query);
@@ -100,7 +100,7 @@ async function run() {
     })
 
 
-    app.patch('/allPets/:petId', async (req, res) => {
+    app.patch('/allPets/:petId', verifyToken, async (req, res) => {
       const id = req.params.petId;
       const updatedPet = req.body;
 
@@ -111,21 +111,21 @@ async function run() {
       res.send(result);
     })
 
-    app.post('/addPet', async (req, res) => {
+    app.post('/addPet', verifyToken, async (req, res) => {
       const pet = req.body;
       const result = await petsCollection.insertOne(pet);
       res.send(result);
     })
 
 
-    app.get('/myPostsList/:userId', async (req, res) => {
+    app.get('/myPostsList/:userId', verifyToken, async (req, res) => {
       const { userId } = req.params;
       const result = await petsCollection.find({ userId: userId }).toArray()
       res.send(result)
     })
 
     // to Create an Adoption Request 
-    app.post('/adopt', async (req, res) => {
+    app.post('/adopt', verifyToken, async (req, res) => {
       const applicationData = req.body;
       applicationData.status = 'pending';
       const result = await adoptionApplicationsCollection.insertOne(applicationData);
@@ -133,13 +133,13 @@ async function run() {
     })
 
     // to get User's Adoption Requests
-    app.get('/my-requests/:email', async (req, res) => {
+    app.get('/my-requests/:email', verifyToken, async (req, res) => {
       const email = req.params.email;
       const result = await adoptionApplicationsCollection.find({ userEmail: email }).toArray();
       res.send(result);
     })
 
-    app.delete('/my-requests/:id', async (req, res) => {
+    app.delete('/my-requests/:id', verifyToken, async (req, res) => {
       const id = req.params.id;
       const result = await adoptionApplicationsCollection.deleteOne({ _id: new ObjectId(id) });
       res.send(result);
@@ -151,7 +151,7 @@ async function run() {
       res.send(result);
     })
 
-    app.patch('/adopt-status/:id', async (req, res) => {
+    app.patch('/adopt-status/:id', verifyToken, async (req, res) => {
       const { id } = req.params;
       const { status, petId } = req.body;
 
