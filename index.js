@@ -137,7 +137,7 @@ async function run() {
       res.send(result);
     })
 
-    app.patch('adopt-status/:id', async (req, res) => {
+    app.patch('/adopt-status/:id', async (req, res) => {
       const { id } = req.params;
       const { status, petId } = req.body;
 
