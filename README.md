@@ -4,7 +4,7 @@
 
 ## 🌐 Live URL
 
-[https://happytails-server.onrender.com](https://happytails-server-eight.vercel.app)
+[https://happytails-server-eight.vercel.app](https://happytails-server-eight.vercel.app)
 
 ---
 
