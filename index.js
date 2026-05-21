@@ -131,6 +131,12 @@ async function run() {
       res.send(result);
     }) 
 
+    app.get('/pet-requests/:petId',async(req,res)=>{
+      const {petId} = req.params;
+      const result = await adoptionApplicationsCollection.find({petId:petId}).toArray();
+      res.send(result);
+    })
+
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
