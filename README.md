@@ -103,22 +103,6 @@ PORT=5000
 
 ---
 
-## 🗂️ Project Structure
-
-```
-happytails-server/
-├── index.js              # Entry point, Express app setup
-├── routes/
-│   ├── pets.js           # Pet CRUD routes
-│   ├── requests.js       # Adoption request routes
-│   └── auth.js           # Auth routes
-├── middleware/
-│   └── verifyToken.js    # JWT verification middleware
-└── .env                  # Environment variables (not committed)
-```
-
----
-
 ## 🛠️ Tech Stack
 
 - **Runtime:** Node.js
